@@ -51,7 +51,8 @@ class Game extends React.Component {
         squares: Array(9).fill(null)
       }],
       xIsNext: true,
-      stepNumber:0,
+      stepNumber: 0,
+      move_coords : [[0,0],]
     };
   }
 
@@ -59,10 +60,15 @@ class Game extends React.Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice()
+    let move_coords = this.state.move_coords.slice(0, this.state.stepNumber + 1)
+    console.log(move_coords)
+    // const move_coords = this.state.move_coords[step_number]
     if (calculateWinner(squares) || squares[i]) {
       return
     }
     squares[i] = this.state.xIsNext ? 'X':'O'
+    move_coords = move_coords.concat([calculate_coords(i)])
+    console.log(move_coords)
     this.setState({
       history:history.concat([
         {
@@ -71,6 +77,7 @@ class Game extends React.Component {
       ]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
+      move_coords: move_coords
     })
   }
 
@@ -87,8 +94,12 @@ class Game extends React.Component {
     const winner = calculateWinner(current.squares)
 
     const moves = history.map((step,move) => {
+      const move_col = this.state.move_coords[move][0]
+      const move_row = this.state.move_coords[move][1]
+      // console.log(move)
+      // console.log(this.state.move_coords)
       const desc = move ?
-        'Go to move #' +move:
+        'Go to move (' + move_col +',' + move_row +')' :
         'Go to game start';
       return (
         <li key={move}>
@@ -148,4 +159,17 @@ function calculateWinner(squares) {
     }
   }
   return null;
+}
+
+function calculate_coords(i){
+  const col = (i%3)+1
+  let row
+  if (i<3){
+    row = 1
+  } else if (i<6){
+    row = 2
+  } else {
+    row =3
+  }
+  return [col,row]
 }

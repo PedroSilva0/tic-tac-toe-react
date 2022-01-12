@@ -131,6 +131,8 @@ class Game extends React.Component {
     let status
     if (winner){
       status = 'Winner: ' + current.squares[winner[0]]
+    }else if (checkDraw(current.squares)){
+      status = "It's a draw!"
     }else{
       status = 'Next player: ' + (this.state.xIsNext ? 'X':'O')
     }
@@ -195,4 +197,8 @@ function calculate_coords(i){
     row =3
   }
   return [col,row]
+}
+
+function checkDraw(squares){
+  return !squares.includes(null)
 }

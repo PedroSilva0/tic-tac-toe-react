@@ -16,6 +16,7 @@ class Board extends React.Component {
     return <Square 
       value={this.props.squares[i]} 
       onClick = {() => this.props.onClick(i)}
+      key={'square'+i}
       />;
 }
 
@@ -26,7 +27,7 @@ class Board extends React.Component {
       squares.push(this.renderSquare(i*3+j))
     } 
 
-    return <div className="board-row">{squares}</div>
+    return <div className="board-row" key={'row'+i}>{squares}</div>
   }
 
 
@@ -53,6 +54,7 @@ class Game extends React.Component {
       stepNumber: 0,
       move_coords : [[0,0],],
       selected_move: null,
+      isReversed: false,
     };
   }
 
@@ -86,28 +88,43 @@ class Game extends React.Component {
     })
   }
 
+  invertPlayState(){
+    this.setState({
+      isReversed: !this.state.isReversed
+    })
+  }
+
+  renderInvertButton(){
+    return(
+      <button onClick={() => this.invertPlayState()} >
+          Invert
+      </button>
+    )
+  }
+
   render() {
     const history = this.state.history;
     const current = history[this.state.stepNumber]
     const winner = calculateWinner(current.squares)
 
     const moves = history.map((step,move) => {
-      const move_col = this.state.move_coords[move][0]
-      const move_row = this.state.move_coords[move][1]
-      const desc = move ?
+      const new_move = this.state.isReversed ? (this.state.history.length-move-1):move 
+      const move_col = this.state.move_coords[new_move][0]
+      const move_row = this.state.move_coords[new_move][1]
+      const desc = new_move ?
         'Go to move (' + move_col +',' + move_row +')' :
         'Go to game start';
       return (
         <li key={move}>
-          <button onClick={() => this.jumpTo(move)} 
-          style = { (this.state.selected_move===move) ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>
+          <button onClick={() => this.jumpTo(new_move)} 
+          style = { (this.state.selected_move===new_move) ? { fontWeight: 'bold' } : { fontWeight: 'normal' }}>
           {desc}
           </button>
         </li>
       )
     })
 
-
+    const reorder = this.renderInvertButton()
 
     let status
     if (winner){
@@ -126,9 +143,12 @@ class Game extends React.Component {
         <div className="game-info">
         <div>{status}</div>
         <ol>{moves}</ol>
+        {reorder}
         </div>
     </div>
     );
+
+    
   }
 }
   
@@ -159,6 +179,7 @@ function calculateWinner(squares) {
   }
   return null;
 }
+
 
 function calculate_coords(i){
   const col = (i%3)+1
